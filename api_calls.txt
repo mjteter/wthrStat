@@ -1,0 +1,21 @@
+wunderground api calls
+
+zoom way out
+http://api.wunderground.com/api/API_KEY_HERE/radar/image.gif?centerlat=39.973401&centerlon=-75.563591&radius=75&width=600&height=600&newmaps=1
+zoomed out home:
+http://api.wunderground.com/api/API_KEY_HERE/radar/image.gif?centerlat=39.973401&centerlon=-75.563591&radius=20&width=600&height=600&newmaps=1
+zoomed in home: 
+http://api.wunderground.com/api/API_KEY_HERE/radar/image.gif?centerlat=39.973401&centerlon=-75.563591&radius=7.1&width=600&height=600&newmaps=1
+
+could try this programmatically
+
+NEVER USE SATELLITE - it sucks
+
+conditions:
+http://api.wunderground.com/api/API_KEY_HERE/conditions/q/PA/West_chester.xml
+
+short forecast
+http://api.wunderground.com/api/API_KEY_HERE/forecast/q/PA/West_chester.xml
+
+icons: use K
+http://icons.wxug.com/i/c/k/partlycloudy.gif
