@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
 # import random
-# import sys
+import sys
 import argparse
 import os
 import pygame
+import threading
+import time
+import signal
 
 # sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import pygameui as ui
@@ -23,47 +26,75 @@ os.putenv('SDL_MOUSEDEV', '/dev/input/touchscreen')
 
 LIST_WIDTH = 180
 MARGIN = 20
-SMALL_MARGIN = 10
+SMALL_MARGIN = 5
 degree_sign = u'\N{DEGREE SIGN}'
 
 
+
+class SettingsScene(ui.Scene):
+    def __init__(self):
+        ui.Scene.__init__(self)
+
+
+
+        self.greet_button = ui.Button(ui.Rect(
+            140, 110, 40, 20), 'back')
+        self.greet_button.on_clicked.connect(self.greet)
+        self.add_child(self.greet_button)
+
+
+    def greet(self, btn, mbtn):
+        ui.scene.pop()
+        ui.scene.push(mainScene)
+
+    def layout(self):
+        # ui.theme.current.set('Label', 'normal', 'padding', (6, 6))
+        ui.kvc.set_value_for_keypath(self.greet_button, 'padding', (6, 6))
+        self.greet_button.render()
+        ui.Scene.layout(self)
+
+
 class MainWthrScene(ui.Scene):
-    def __init__(self, width=480, height=320):
+    def __init__(self):
         ui.Scene.__init__(self)
 
         # label1Size = 32
         # label2Size = 16
 
-        ui.theme.current.set('Label', 'normal', 'background_color', (100, 255, 255))  # useful for seeing labels better
+        # ui.theme.current.set('Label', 'normal', 'background_color', (100, 255, 255))  # useful for seeing labels better
         ui.theme.current.set('Label', 'normal', 'padding', (0, 0))
         label_height = ui.theme.current.label_height
 
         # frame = ui.Rect(MARGIN, MARGIN, 100, label_height)
 
-        mainLblHt = 100
 
         #CURRENT DRYBULB
-        self.lblDb = ui.Label(ui.Rect(SMALL_MARGIN, SMALL_MARGIN, width - 2 * SMALL_MARGIN, mainLblHt), "100 " +
-                              degree_sign + "F")
+        self.lblDb = ui.Label(ui.Rect(0, 0, 320, 90), "100 " + degree_sign + "F", halign=ui.label.LEFT)
         self.add_child(self.lblDb)
 
         # HIGH PREDICTION
-        self.lblHighDbLbl = ui.Label(ui.Rect(SMALL_MARGIN, mainLblHt + 2 * SMALL_MARGIN, 40, label_height), "High: ",
+        self.lblHighDbLbl = ui.Label(ui.Rect(SMALL_MARGIN, self.lblDb.frame.bottom + SMALL_MARGIN, 40, label_height), "High: ",
                                      halign=ui.label.LEFT)
         self.add_child(self.lblHighDbLbl)
 
-        self.lblHighDb = ui.Label(ui.Rect(40 + SMALL_MARGIN, mainLblHt + 2 * SMALL_MARGIN, 50, label_height), "100 " + degree_sign +
+        self.lblHighDb = ui.Label(ui.Rect(40 + SMALL_MARGIN, self.lblHighDbLbl.frame.top, 50, label_height), "100 " + degree_sign +
                                   "F", halign=ui.label.LEFT)
         self.add_child(self.lblHighDb)
 
         # LOW PREDICTION
-        self.lblLowDbLbl = ui.Label(ui.Rect(SMALL_MARGIN, mainLblHt + 3 * SMALL_MARGIN + label_height, 40, label_height), "Low: ",
+        self.lblLowDbLbl = ui.Label(ui.Rect(SMALL_MARGIN, self.lblHighDbLbl.frame.bottom + SMALL_MARGIN, 40, label_height), "Low: ",
                                      halign=ui.label.LEFT)
         self.add_child(self.lblLowDbLbl)
 
-        self.lblLowDb = ui.Label(ui.Rect(40 + SMALL_MARGIN, mainLblHt + 3 * SMALL_MARGIN + label_height, 50, label_height), "100 " + degree_sign +
+        self.lblLowDb = ui.Label(ui.Rect(40 + SMALL_MARGIN, self.lblLowDbLbl.frame.top, 50, label_height), "100 " + degree_sign +
                                   "F", halign=ui.label.LEFT)
         self.add_child(self.lblLowDb)
+
+
+        # dispImg = ui.get_image('/home/pi/JDrive/Utility_Meter_Tracking/Server_Polling/wthrStat/resources/partlycloudy.gif')
+        dispImg = pygame.image.load('resources/partlycloudy.png')
+        self.wthrImg = ui.ImageView(ui.Rect(self.lblHighDb.frame.right + SMALL_MARGIN, self.lblDb.frame.bottom + SMALL_MARGIN, 50, 50), dispImg)
+        self.add_child(self.wthrImg)
 
         # self.name_textfield = ui.TextField(frame, placeholder='Your name')
         # self.name_textfield.centerx = self.frame.centerx
@@ -75,7 +106,8 @@ class MainWthrScene(ui.Scene):
         #     200 - scrollbar_size, 250), gridview)
         # self.add_child(self.scroll_gridview)
         #
-        #  item in items]
+        # items = ['Apples', 'Bananas', 'Grapes', 'Cheese', 'Goats', 'Beer']
+        # labels = [ui.Label(ui.Rect(0, 0, LIST_WIDTH, label_height), item, halign=ui.LEFT) for item in items]
         # list_view = ui.ListView(ui.Rect(0, 0, LIST_WIDTH, 400), labels)
         # list_view.on_selected.connect(self.item_selected)
         # list_view.on_deselected.connect(self.item_deselected)
@@ -84,11 +116,9 @@ class MainWthrScene(ui.Scene):
         #     LIST_WIDTH, 80), list_view)
         # self.add_child(self.scroll_list)
         #
-        # self.greet_button = ui.Button(ui.Rect(
-        #     self.name_textfield.frame.right + SMALL_MARGIN,
-        #     self.name_textfield.frame.top, 0, 0), 'Submit')
-        # self.greet_button.on_clicked.connect(self.greet)
-        # self.add_child(self.greet_button)
+        self.greet_button = ui.Button(ui.Rect(self.lblHighDb.frame.right + SMALL_MARGIN, self.wthrImg.frame.bottom + SMALL_MARGIN, 0, 0), 'blank')
+        self.greet_button.on_clicked.connect(self.greet)
+        self.add_child(self.greet_button)
         #
         # self.image_view = ui.view_for_image_named('logo')
         # self.image_view.frame.right = self.frame.right - MARGIN
@@ -144,17 +174,15 @@ class MainWthrScene(ui.Scene):
         # self.add_child(self.progress_view)
         # self.progress_view.hidden = True
         #
-        # labels2 = [ui.Label(
-        #     ui.Rect(0, 0, LIST_WIDTH, label_height),
-        #     'Item %d' % (i + 1)) for i in range(10)]
-        # for l in labels2:
-        #     l.halign = ui.LEFT
-        # self.select_view = ui.SelectView(ui.Rect(
-        #     self.task_button.frame.left,
-        #     self.task_button.frame.bottom + MARGIN,
-        #     LIST_WIDTH, label_height), labels2)
+        labels2 = [ui.Label(
+            ui.Rect(0, 0, 100, label_height),
+            'Item %d' % (i + 1)) for i in range(10)]
+        for l in labels2:
+            l.halign = ui.LEFT
+        self.select_view = ui.SelectView(ui.Rect(5, 10,
+            LIST_WIDTH, label_height), labels2)
         # self.select_view.on_selection_changed.connect(self.selection_changed)
-        # self.add_child(self.select_view)
+        self.add_child(self.select_view)
         #
         # self.hslider = ui.SliderView(ui.Rect(
         #     self.select_view.frame.left,
@@ -205,7 +233,9 @@ class MainWthrScene(ui.Scene):
     # def value_changed(self, slider_view, value):
     #     self.slider_value.text = '%d' % value
     #
-    # def greet(self, btn, mbtn):
+    def greet(self, btn, mbtn):
+        ui.scene.pop()
+        ui.scene.push(settingsScene)
     #     name = self.name_textfield.text.strip()
     #     if len(name) == 0:
     #         name = 'uh, you?'
@@ -252,19 +282,41 @@ class MainWthrScene(ui.Scene):
     #             ui.show_alert("I'M FINISHED!", title='Milkshake')
     #             self.progress_view.progress = 0
     #             self.progress_view.hidden = True
+    def setTempLabel(self, temp):
+        self.lblDb.text = '%.0f' % temp + degree_sign + 'F'
+
+class GetWUdata():
+    def __init__(self, mainScrn):
+        self.mainScrn = mainScrn
+        self.terminated = False
+
+    def terminate(self):
+        self.terminated = True
+
+    def __call__(self, *args, **kwargs):
+        startTime = time.time()
+        while not self.terminated:
+            if time.time() - startTime > 10:
+                startTime = time.time()
+                self.mainScrn.setTempLabel(40)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Weather station display for local sensors and Weather Underground '
-                                                 'data.')
-    parser.add_argument('-wd', '--width', type=int, default=480, help='The width of the PiTFT. [480]')
-    parser.add_argument('-ht', '--height', type=int, default=320, help='The height of the PiTFT. [320]')
 
-    args = parser.parse_args()
+def signal_handler(signal, frame):
+    wthrReader.terminate()
+    sys.exit(0)
 
-    ui.init('pygameui - Weather Station', (args.width, args.height))
-    pygame.mouse.set_visible(False)
-    mainScene = MainWthrScene(args.width, args.height)
-    ui.scene.push(mainScene)
+ui.init('pygameui - Weather Station', (320, 240))
+pygame.mouse.set_visible(False)
 
-    ui.run()
+
+mainScene = MainWthrScene()
+settingsScene = SettingsScene()
+wthrReader = GetWUdata(mainScene)
+# threading.Thread(target=wthrReader).start()
+
+signal.signal(signal.SIGINT, signal_handler)
+
+ui.scene.push(mainScene)
+
+ui.run()
