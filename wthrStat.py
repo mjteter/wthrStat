@@ -67,9 +67,15 @@ class MainWthrScene(ui.Scene):
 
         # frame = ui.Rect(MARGIN, MARGIN, 100, label_height)
 
+        labels2 = [ui.Label(ui.Rect(0, 0, 100, label_height), 'Item %d' % (i + 1)) for i in range(10)]
+        for l in labels2:
+            l.halign = ui.LEFT
+        self.select_view = ui.SelectView(ui.Rect(SMALL_MARGIN, SMALL_MARGIN, 180, label_height), labels2)
+        # self.select_view.on_selection_changed.connect(self.selection_changed)
+        self.add_child(self.select_view)
 
         #CURRENT DRYBULB
-        self.lblDb = ui.Label(ui.Rect(0, 0, 320, 90), "100 " + degree_sign + "F", halign=ui.label.LEFT)
+        self.lblDb = ui.Label(ui.Rect(0, label_height + 2 * SMALL_MARGIN, 320, 90), "100 " + degree_sign + "F", halign=ui.label.LEFT)
         self.add_child(self.lblDb)
 
         # HIGH PREDICTION
@@ -174,15 +180,7 @@ class MainWthrScene(ui.Scene):
         # self.add_child(self.progress_view)
         # self.progress_view.hidden = True
         #
-        labels2 = [ui.Label(
-            ui.Rect(0, 0, 100, label_height),
-            'Item %d' % (i + 1)) for i in range(10)]
-        for l in labels2:
-            l.halign = ui.LEFT
-        self.select_view = ui.SelectView(ui.Rect(5, 10,
-            LIST_WIDTH, label_height), labels2)
-        # self.select_view.on_selection_changed.connect(self.selection_changed)
-        self.add_child(self.select_view)
+        
         #
         # self.hslider = ui.SliderView(ui.Rect(
         #     self.select_view.frame.left,
@@ -306,7 +304,7 @@ def signal_handler(signal, frame):
     wthrReader.terminate()
     sys.exit(0)
 
-ui.init('pygameui - Weather Station', (320, 240))
+ui.init('pygameui - Weather Station', (480, 320))
 pygame.mouse.set_visible(False)
 
 
