@@ -19,3 +19,129 @@ http://api.wunderground.com/api/API_KEY_HERE/forecast/q/PA/West_chester.xml
 
 icons: use K
 http://icons.wxug.com/i/c/k/partlycloudy.gif
+
+
+CONDITIONS JSON:
+{  
+   "response":{  
+      "version":"0.1",
+      "termsofService":"http://www.wunderground.com/weather/api/d/terms.html",
+      "features":{  
+         "conditions":1
+      }
+   },
+   "current_observation":{  
+      "image":{  
+         "url":"http://icons.wxug.com/graphics/wu2/logo_130x80.png",
+         "title":"Weather Underground",
+         "link":"http://www.wunderground.com"
+      },
+      "display_location":{  
+         "full":"West Chester, PA",
+         "city":"West Chester",
+         "state":"PA",
+         "state_name":"Pennsylvania",
+         "country":"US",
+         "country_iso3166":"US",
+         "zip":"19380",
+         "magic":"1",
+         "wmo":"99999",
+         "latitude":"39.97999954",
+         "longitude":"-75.59999847",
+         "elevation":"121.0"
+      },
+      "observation_location":{  
+         "full":"Woodcrest Circle, West Chester, Pennsylvania",
+         "city":"Woodcrest Circle, West Chester",
+         "state":"Pennsylvania",
+         "country":"US",
+         "country_iso3166":"US",
+         "latitude":"39.974651",
+         "longitude":"-75.586761",
+         "elevation":"505 ft"
+      },
+      "estimated":{  
+
+      },
+      "station_id":"KPAWESTC28",
+      "observation_time":"Last Updated on December 16, 10:31 AM EST",
+      "observation_time_rfc822":"Fri, 16 Dec 2016 10:31:52 -0500",
+      "observation_epoch":"1481902312",
+      "local_time_rfc822":"Fri, 16 Dec 2016 10:40:04 -0500",
+      "local_epoch":"1481902804",
+      "local_tz_short":"EST",
+      "local_tz_long":"America/New_York",
+      "local_tz_offset":"-0500",
+      "weather":"Partly Cloudy",
+      "temperature_string":"19.9 F (-6.7 C)",
+      "temp_f":19.9,
+      "temp_c":-6.7,
+      "relative_humidity":"60%",
+      "wind_string":"From the WNW at 1.9 MPH Gusting to 5.6 MPH",
+      "wind_dir":"WNW",
+      "wind_degrees":285,
+      "wind_mph":1.9,
+      "wind_gust_mph":"5.6",
+      "wind_kph":3.1,
+      "wind_gust_kph":"9.0",
+      "pressure_mb":"1031",
+      "pressure_in":"30.45",
+      "pressure_trend":"-",
+      "dewpoint_string":"8 F (-13 C)",
+      "dewpoint_f":8,
+      "dewpoint_c":-13,
+      "heat_index_string":"NA",
+      "heat_index_f":"NA",
+      "heat_index_c":"NA",
+      "windchill_string":"20 F (-7 C)",
+      "windchill_f":"20",
+      "windchill_c":"-7",
+      "feelslike_string":"20 F (-7 C)",
+      "feelslike_f":"20",
+      "feelslike_c":"-7",
+      "visibility_mi":"10.0",
+      "visibility_km":"16.1",
+      "solarradiation":"--",
+      "UV":"2",
+      "precip_1hr_string":"-999.00 in ( 0 mm)",
+      "precip_1hr_in":"-999.00",
+      "precip_1hr_metric":" 0",
+      "precip_today_string":"0.00 in (0 mm)",
+      "precip_today_in":"0.00",
+      "precip_today_metric":"0",
+      "icon":"partlycloudy",
+      "icon_url":"http://icons.wxug.com/i/c/k/partlycloudy.gif",
+      "forecast_url":"http://www.wunderground.com/US/PA/West_Chester.html",
+      "history_url":"http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=KPAWESTC28",
+      "ob_url":"http://www.wunderground.com/cgi-bin/findweather/getForecast?query=39.974651,-75.586761",
+      "nowcast":""
+   }
+}
+
+
+DESIRED FROM JSON:
+"temp_f":19.9,
+"dewpoint_f":8,
+"heat_index_f":"NA",
+"windchill_f":"20",
+"feelslike_f":"20",
+
+"relative_humidity":"60%",
+
+"wind_dir":"WNW",
+
+"wind_degrees":285,
+
+"wind_mph":1.9,
+"wind_gust_mph":"5.6",
+
+"pressure_in":"30.45",
+
+"UV":"2",
+
+"icon":"partlycloudy",
+
+JSON DOES NOT HAVE:
+wetbulb_f
+enthalpy_btu-lb
+humidity_ratio_gr-lb

@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-# import random
 import sys
-import argparse
 import os
 import pygame
-import threading
 import time
 import signal
+import getWeatherData
 
 # sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import pygameui as ui
@@ -27,7 +25,7 @@ os.putenv('SDL_MOUSEDEV', '/dev/input/touchscreen')
 LIST_WIDTH = 180
 MARGIN = 20
 SMALL_MARGIN = 5
-degree_sign = u'\N{DEGREE SIGN}'
+DEGREE_SIGN = u'\N{DEGREE SIGN}'
 
 
 
@@ -35,7 +33,7 @@ class SettingsScene(ui.Scene):
     def __init__(self):
         ui.Scene.__init__(self)
 
-
+        self.sceneId = 2;
 
         self.greet_button = ui.Button(ui.Rect(
             140, 110, 40, 20), 'back')
@@ -57,7 +55,7 @@ class SettingsScene(ui.Scene):
 class MainWthrScene(ui.Scene):
     def __init__(self):
         ui.Scene.__init__(self)
-
+        self.sceneId = 1;
         # label1Size = 32
         # label2Size = 16
 
@@ -75,15 +73,15 @@ class MainWthrScene(ui.Scene):
         self.add_child(self.select_view)
 
         #CURRENT DRYBULB
-        self.lblDb = ui.Label(ui.Rect(0, label_height + 2 * SMALL_MARGIN, 320, 90), "100 " + degree_sign + "F", halign=ui.label.LEFT)
-        self.add_child(self.lblDb)
+        self.lblCurBigLabel = ui.Label(ui.Rect(0, label_height + 2 * SMALL_MARGIN, 320, 90), "100 " + DEGREE_SIGN + "F", halign=ui.label.RIGHT)
+        self.add_child(self.lblCurBigLabel)
 
         # HIGH PREDICTION
-        self.lblHighDbLbl = ui.Label(ui.Rect(SMALL_MARGIN, self.lblDb.frame.bottom + SMALL_MARGIN, 40, label_height), "High: ",
+        self.lblHighDbLbl = ui.Label(ui.Rect(SMALL_MARGIN, self.lblCurBigLabel.frame.bottom + SMALL_MARGIN, 40, label_height), "High: ",
                                      halign=ui.label.LEFT)
         self.add_child(self.lblHighDbLbl)
 
-        self.lblHighDb = ui.Label(ui.Rect(40 + SMALL_MARGIN, self.lblHighDbLbl.frame.top, 50, label_height), "100 " + degree_sign +
+        self.lblHighDb = ui.Label(ui.Rect(40 + SMALL_MARGIN, self.lblHighDbLbl.frame.top, 50, label_height), "100 " + DEGREE_SIGN +
                                   "F", halign=ui.label.LEFT)
         self.add_child(self.lblHighDb)
 
@@ -92,14 +90,14 @@ class MainWthrScene(ui.Scene):
                                      halign=ui.label.LEFT)
         self.add_child(self.lblLowDbLbl)
 
-        self.lblLowDb = ui.Label(ui.Rect(40 + SMALL_MARGIN, self.lblLowDbLbl.frame.top, 50, label_height), "100 " + degree_sign +
+        self.lblLowDb = ui.Label(ui.Rect(40 + SMALL_MARGIN, self.lblLowDbLbl.frame.top, 50, label_height), "100 " + DEGREE_SIGN +
                                   "F", halign=ui.label.LEFT)
         self.add_child(self.lblLowDb)
 
 
         # dispImg = ui.get_image('/home/pi/JDrive/Utility_Meter_Tracking/Server_Polling/wthrStat/resources/partlycloudy.gif')
         dispImg = pygame.image.load('resources/partlycloudy.png')
-        self.wthrImg = ui.ImageView(ui.Rect(self.lblHighDb.frame.right + SMALL_MARGIN, self.lblDb.frame.bottom + SMALL_MARGIN, 50, 50), dispImg)
+        self.wthrImg = ui.ImageView(ui.Rect(self.lblHighDb.frame.right + SMALL_MARGIN, self.lblCurBigLabel.frame.bottom + SMALL_MARGIN, 50, 50), dispImg)
         self.add_child(self.wthrImg)
 
         # self.name_textfield = ui.TextField(frame, placeholder='Your name')
@@ -211,10 +209,10 @@ class MainWthrScene(ui.Scene):
     def layout(self):
         # self.checkbox.toggle()
         # self.checkbox1.toggle()
-        ui.kvc.set_value_for_keypath(self.lblDb, 'font', ui.resource.get_font(100))
+        ui.kvc.set_value_for_keypath(self.lblCurBigLabel, 'font', ui.resource.get_font(100))
         ui.kvc.set_value_for_keypath(self.lblHighDb, 'background_color', (255, 200, 255))
 
-        self.lblDb.render()
+        self.lblCurBigLabel.render()
         self.lblHighDb.render()
 
         ui.Scene.layout(self)
@@ -281,7 +279,7 @@ class MainWthrScene(ui.Scene):
     #             self.progress_view.progress = 0
     #             self.progress_view.hidden = True
     def setTempLabel(self, temp):
-        self.lblDb.text = '%.0f' % temp + degree_sign + 'F'
+        self.lblCurBigLabel.text = '%.0f' % temp + DEGREE_SIGN + 'F'
 
 class GetWUdata():
     def __init__(self, mainScrn):
@@ -304,7 +302,29 @@ def signal_handler(signal, frame):
     wthrReader.terminate()
     sys.exit(0)
 
-ui.init('pygameui - Weather Station', (480, 320))
+def getWuData(mainScrn, currentDataTimeout, forecastDataTimeout):
+    if time.time() - getWuData.startCurTime > currentDataTimeout:
+        print 'get current data'
+        parsedJson = getWeatherData.getCurrentData()
+
+        mainScrn.lblCurBigLabel.text = getWeatherData.data2string(parsedJson, curDataDict['bigLabel'])
+        # mainScrn.lblCurLabel1.text = getWeatherData.data2string(parsedJson, curDataDict['label1'])
+        # mainScrn.lblCurLabel2.text = getWeatherData.data2string(parsedJson, curDataDict['label2'])
+        # mainScrn.lblCurLabel3.text = getWeatherData.data2string(parsedJson, curDataDict['label3'])
+        getWuData.startCurTime = time.time()
+        # if ui.scene.current.sceneId == 1:
+
+    if time.time() - getWuData.startForTime > forecastDataTimeout:
+        getWuData.startForTime = time.time()
+        print 'get forecast data'
+
+getWuData.startCurTime = 0 #time.time()
+getWuData.startForTime = time.time()
+
+curDataDict = {'bigLabel': 'temp_f', 'label1': 'feelslike_f', 'label2': 'relative_humidity', 'label3': 'wind_mph'}
+
+# start up gui
+ui.init('pygameui - Weather Station', (320, 240))
 pygame.mouse.set_visible(False)
 
 
@@ -317,4 +337,4 @@ signal.signal(signal.SIGINT, signal_handler)
 
 ui.scene.push(mainScene)
 
-ui.run()
+ui.run(getWuData, mainScene, 10, 10)
